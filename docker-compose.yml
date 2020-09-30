@@ -1,0 +1,105 @@
+version: "2.4"
+services:
+  openresty:
+        image:  openresty:latest
+        container_name: openresty
+        links:
+          - "php74"
+        volumes:
+          - ${DOCKER_CODE_PATH}:/data/wwwroot
+          - ./data/openresty/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
+          - ./data/openresty/logs:/data/openresty/logs
+          - ./data/openresty/vhost:/etc/nginx/conf.d
+        ports:
+          - 80:80
+          - 443:443
+        extra_hosts:
+            - "www.lcr.cn:127.0.0.1"
+        networks:
+          extnetwork:
+            ipv4_address: 172.19.0.2
+  php74:
+        image: php:74
+        container_name: php74
+        #entrypoint: ["tail", "-f","/dev/null"]
+        #entrypoint: ["php-fpm","-y /data/php72/fpm/php-fpm.conf"]
+        volumes:
+          - ${DOCKER_CODE_PATH}:/data/wwwroot
+          - ./data/php:/data/php74
+          - ./data/php/fpm/php-fpm.conf:/usr/local/php/etc/php-fpm.conf
+        expose:
+            - 9000
+        networks:
+          extnetwork:
+            ipv4_address: 172.19.0.3
+  elasticsearch:
+    image: elasticsearch:7.8.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    expose:
+      - 9200
+    networks:
+      extnetwork:
+        ipv4_address: 172.19.0.4
+  kibana:
+    image: kibana:7.7.1
+    container_name: kibana
+    volumes:
+      - ./data/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      extnetwork:
+        ipv4_address: 172.19.0.5
+  redis:
+    image:  redis:latest
+    volumes:
+      - ./data/redis:/data/redis
+    command:
+      redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    networks:
+      extnetwork:
+        ipv4_address: 172.19.0.6
+  mysql:
+    image:  mysql:5.7
+    container_name: mysql
+    volumes:
+      - ./data/mysql/conf:/etc/mysql/conf.d
+      - ./data/mysql/data:/var/lib/mysql
+      - ./data/mysql/log:/var/log/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "3306:3306"
+    networks:
+      extnetwork:
+        ipv4_address: 172.19.0.7
+  clion-remote-cpp:
+    image:  clion-remote-cpp:1.0.0
+    container_name: clion-remote-cpp
+    user: root
+    working_dir: /data/wwwroot
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ${DOCKER_CCODE_PATH}:/data/wwwroot
+      - ${DOCKER_CODE_PATH}:/data/www
+    command:
+      bash -c "service ssh restart && tail -f /dev/null"
+    ports:
+      - "2222:22"
+      - "2223:2223"
+    networks:
+      extnetwork:
+        ipv4_address: 172.19.0.8
+networks:
+  extnetwork:
+     ipam:
+       driver: default
+       config:
+        - subnet: "172.19.0.0/24"
