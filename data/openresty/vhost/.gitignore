@@ -1,0 +1,5 @@
+*
+!.gitignore
+!fastcgi_params
+!ssl.conf
+!www.lcr.cn.conf
