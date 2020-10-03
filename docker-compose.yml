@@ -1,7 +1,7 @@
 version: "2.4"
 services:
   openresty:
-        image:  openresty:latest
+        image:  lcrooxx/openresty:latest
         container_name: openresty
         links:
           - "php74"
@@ -19,7 +19,7 @@ services:
           extnetwork:
             ipv4_address: 172.19.0.2
   php74:
-        image: php:74
+        image: lcrooxx/php:74
         container_name: php74
         #entrypoint: ["tail", "-f","/dev/null"]
         #entrypoint: ["php-fpm","-y /data/php72/fpm/php-fpm.conf"]
@@ -78,7 +78,7 @@ services:
       extnetwork:
         ipv4_address: 172.19.0.7
   clion-remote-cpp:
-    image:  clion-remote-cpp:1.0.0
+    image:  lcrooxx/clion-remote-cpp:1.0.0
     container_name: clion-remote-cpp
     user: root
     working_dir: /data/wwwroot
