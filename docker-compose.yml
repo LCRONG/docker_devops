@@ -29,6 +29,7 @@ services:
           - ./data/php/fpm/php-fpm.conf:/usr/local/php/etc/php-fpm.conf
         expose:
             - 9000
+        privileged: true
         networks:
           extnetwork:
             ipv4_address: 172.19.0.3
